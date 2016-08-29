@@ -2,15 +2,17 @@ FROM alpine:3.4
 
 MAINTAINER Gavin Zhou <gavin.zhou@gmail.com>
 
-RUN addgroup pumba && adduser -s /bin/ash -D -G pumba pumba
+ENV GOSU_VERSION=1.9 \
+ PUMBA_VERSION=0.2.4
 
-ENV GOSU_VERSION 1.9
 RUN set -x \
+    && addgroup pumba && adduser -s /bin/ash -D -G pumba pumba \
+    && apk add --no-cache iproute2 \
     && apk add --no-cache --virtual .gosu-deps dpkg gnupg openssl ca-certificates make gcc musl-dev curl \
     && dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
     && wget -q -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" \
     && wget -q -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc" \
-    && wget -q -O /usr/bin/pumba "https://github.com/gaia-adm/pumba/releases/download/0.2.1/pumba_linux_amd64" \
+    && wget -q -O /usr/bin/pumba "https://github.com/gaia-adm/pumba/releases/download/$PUMBA_VERSION/pumba_linux_amd64" \
     && curl -sSL https://github.com/Yelp/dumb-init/archive/master.tar.gz | tar -xz \
     && cd dumb-init-master && gcc -std=gnu99 -s -Wall -Werror -O3 -o /sbin/dumb-init /dumb-init-master/dumb-init.c \
     && export GNUPGHOME="$(mktemp -d)" \
